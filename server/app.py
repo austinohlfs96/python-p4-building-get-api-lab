@@ -4,6 +4,7 @@ from flask import Flask, make_response, jsonify
 from flask_migrate import Migrate
 
 from models import db, Bakery, BakedGood
+from sqlalchemy import desc
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -20,19 +21,31 @@ def index():
 
 @app.route('/bakeries')
 def bakeries():
-    return ''
+    bakeries = []
+    for item in Bakery.query.order_by('created_at').all():
+            bakeries.append(item.to_dict())
+    return make_response(bakeries, 200)
+
 
 @app.route('/bakeries/<int:id>')
 def bakery_by_id(id):
-    return ''
+    return Bakery.query.filter(Bakery.id == id).first().to_dict(), 200
 
 @app.route('/baked_goods/by_price')
 def baked_goods_by_price():
-    return ''
+    list_by_price = []
+    for items in BakedGood.query.order_by(desc(BakedGood.price)).all():
+        list_by_price.append(items.to_dict())
+    return make_response(list_by_price, 200)
+    # bakeries = []
+    # for item in Bakery.query.order_by('created_at').all():
+    #         bakeries.append(item.to_dict())
+    # return make_response(bakeries, 200)
 
 @app.route('/baked_goods/most_expensive')
 def most_expensive_baked_good():
-    return ''
+    most_exp = BakedGood.query.order_by(desc(BakedGood.price)).first().to_dict()
+    return make_response(most_exp, 200)
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
